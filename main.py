@@ -221,6 +221,111 @@ class Board:
                     self.pieces[y][x].possible_moves.append((y+1, x-2))
                 if self.within_board((y+1, x+2)) and (not self.pieces[y+1][x+2] or (self.pieces[y+1][x+2] and self.pieces[y+1][x+2].bw != self.pieces[y][x].bw)):
                     self.pieces[y][x].possible_moves.append((y+1, x+2))
+            elif self.pieces[y][x].name == "bishop":
+                i = y+1
+                j = x+1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i += 1
+                    j += 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y - 1
+                j = x + 1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i -= 1
+                    j += 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y - 1
+                j = x - 1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i -= 1
+                    j -= 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y + 1
+                j = x - 1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i += 1
+                    j -= 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+            elif self.pieces[y][x].name == "queen":
+                i = y+1
+                j = x+1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i += 1
+                    j += 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y - 1
+                j = x + 1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i -= 1
+                    j += 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y - 1
+                j = x - 1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i -= 1
+                    j -= 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y + 1
+                j = x - 1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i += 1
+                    j -= 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y+1
+                j = x
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i += 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y - 1
+                j = x
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    i -= 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y
+                j = x - 1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    j -= 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
+                i = y
+                j = x + 1
+                while self.within_board((i, j)) and not self.pieces[i][j]:
+                    self.pieces[y][x].possible_moves.append((i, j))
+                    j += 1
+                if self.within_board((i, j)) and self.pieces[i][j].bw != self.pieces[y][x].bw:
+                    self.pieces[y][x].possible_moves.append((i, j))
+
             print(self.pieces[y][x].possible_moves)
 
     def attempt_move(self, y, x):
