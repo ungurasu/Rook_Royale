@@ -135,10 +135,30 @@ class Board:
             img_selected_piece_icon_rect[0] = self.off_x + self.tile_size*9
             img_selected_piece_icon_rect[1] = self.off_y + self.tile_size
 
+        img_vertical_coords_surf = list()
+        img_vertical_coords_rect = list()
+        for i in range(0, 8):
+            img_vertical_coords_surf.append(self.font.render("{}".format(i+1), True, (0, 0, 0)))
+            img_vertical_coords_rect.append(img_vertical_coords_surf[i].get_rect())
+            img_vertical_coords_rect[i][0] = self.off_x/2
+            img_vertical_coords_rect[i][1] = self.off_y*1.35 + self.tile_size*i
+
+        img_horizontal_coords_surf = list()
+        img_horizontal_coords_rect = list()
+        for i in range(0, 8):
+            img_horizontal_coords_surf.append(self.font.render("{}".format(chr(97+i)), True, (0, 0, 0)))
+            img_horizontal_coords_rect.append(img_horizontal_coords_surf[i].get_rect())
+            img_horizontal_coords_rect[i][0] = self.off_x*1.45 + self.tile_size*i
+            img_horizontal_coords_rect[i][1] = self.off_y+ self.tile_size * 8
+
         self.game_screen.blit(img_player_surf, img_player_rect)
         self.game_screen.blit(img_selected_piece_surf, img_selected_piece_rect)
         if img_selected_piece_icon_surf:
             self.game_screen.blit(img_selected_piece_icon_surf, img_selected_piece_icon_rect)
+        for i in range(0, 8):
+            self.game_screen.blit(img_vertical_coords_surf[i], img_vertical_coords_rect[i])
+        for i in range(0, 8):
+            self.game_screen.blit(img_horizontal_coords_surf[i], img_horizontal_coords_rect[i])
 
     def blit_board(self):
         self.blit_tiles()
@@ -165,8 +185,8 @@ class Board:
     def generate_piece_possible_moves(self, y, x):
         if self.selected_piece != "none":
             self.pieces[y][x].possible_moves = list()
-            if not self.pieces[y][x].bw:
-                if self.pieces[y][x].name == "pawn":
+            if self.pieces[y][x].name == "pawn":
+                if not self.pieces[y][x].bw:
                     if self.within_board((y+1, x)) and not self.pieces[y+1][x]:
                         self.pieces[y][x].possible_moves.append((y+1, x))
                     if self.within_board((y+2, x)) and self.pieces[y][x].move == 0 and not self.pieces[y+2][x]:
@@ -175,8 +195,7 @@ class Board:
                         self.pieces[y][x].possible_moves.append((y+1, x-1))
                     if self.within_board((y+1, x+1)) and ((self.pieces[y+1][x+1] and self.pieces[y+1][x+1].bw != self.pieces[y][x].bw) or (self.pieces[y][x+1] and self.pieces[y][x+1].bw != self.pieces[y][x].bw and self.pieces[y][x+1].move == 1 and self.pieces[y][x+1].movedtwo and self.pieces[y][x+1].name == "pawn")):
                         self.pieces[y][x].possible_moves.append((y+1, x+1))
-            else:
-                if self.pieces[y][x].name == "pawn":
+                else:
                     if self.within_board((y-1, x)) and not self.pieces[y-1][x]:
                         self.pieces[y][x].possible_moves.append((y-1, x))
                     if self.within_board((y-2, x)) and self.pieces[y][x].move == 0 and not self.pieces[y-2][x]:
@@ -185,7 +204,23 @@ class Board:
                         self.pieces[y][x].possible_moves.append((y-1, x-1))
                     if self.within_board((y-1, x+1)) and ((self.pieces[y-1][x+1] and self.pieces[y-1][x+1].bw != self.pieces[y][x].bw) or (self.pieces[y][x+1] and self.pieces[y][x+1].bw != self.pieces[y][x].bw and self.pieces[y][x+1].move == 1 and self.pieces[y][x+1].movedtwo and self.pieces[y][x+1].name == "pawn")):
                         self.pieces[y][x].possible_moves.append((y-1, x+1))
-
+            elif self.pieces[y][x].name == "horse":
+                if self.within_board((y-2, x-1)) and (not self.pieces[y-2][x-1] or (self.pieces[y-2][x-1] and self.pieces[y-2][x-1].bw != self.pieces[y][x].bw)):
+                    self.pieces[y][x].possible_moves.append((y-2, x-1))
+                if self.within_board((y-2, x+1)) and (not self.pieces[y-2][x+1] or (self.pieces[y-2][x+1] and self.pieces[y-2][x+1].bw != self.pieces[y][x].bw)):
+                    self.pieces[y][x].possible_moves.append((y-2, x+1))
+                if self.within_board((y+2, x-1)) and (not self.pieces[y+2][x-1] or (self.pieces[y+2][x-1] and self.pieces[y+2][x-1].bw != self.pieces[y][x].bw)):
+                    self.pieces[y][x].possible_moves.append((y+2, x-1))
+                if self.within_board((y+2, x+1)) and (not self.pieces[y+2][x+1] or (self.pieces[y+2][x+1] and self.pieces[y+2][x+1].bw != self.pieces[y][x].bw)):
+                    self.pieces[y][x].possible_moves.append((y+2, x+1))
+                if self.within_board((y-1, x-2)) and (not self.pieces[y-1][x-2] or (self.pieces[y-1][x-2] and self.pieces[y-1][x-2].bw != self.pieces[y][x].bw)):
+                    self.pieces[y][x].possible_moves.append((y-1, x-2))
+                if self.within_board((y-1, x+2)) and (not self.pieces[y-1][x+2] or (self.pieces[y-1][x+2] and self.pieces[y-1][x+2].bw != self.pieces[y][x].bw)):
+                    self.pieces[y][x].possible_moves.append((y-1, x+2))
+                if self.within_board((y+1, x-2)) and (not self.pieces[y+1][x-2] or (self.pieces[y+1][x-2] and self.pieces[y+1][x-2].bw != self.pieces[y][x].bw)):
+                    self.pieces[y][x].possible_moves.append((y+1, x-2))
+                if self.within_board((y+1, x+2)) and (not self.pieces[y+1][x+2] or (self.pieces[y+1][x+2] and self.pieces[y+1][x+2].bw != self.pieces[y][x].bw)):
+                    self.pieces[y][x].possible_moves.append((y+1, x+2))
             print(self.pieces[y][x].possible_moves)
 
     def attempt_move(self, y, x):
