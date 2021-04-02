@@ -59,6 +59,8 @@ class Board:
         self.selected_piece = "none"
         self.selected_y = 0
         self.selected_x = 0
+        self.white_warning = 0
+        self.black_warning = 0
 
         self.tiles = [[0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -151,6 +153,26 @@ class Board:
             img_horizontal_coords_rect[i][0] = self.off_x*1.45 + self.tile_size*i
             img_horizontal_coords_rect[i][1] = self.off_y+ self.tile_size * 8
 
+        img_white_warning_surf = 0
+        if self.white_warning:
+            if self.white_warning == 1:
+                img_white_warning_surf = self.font.render("White is in check!", True, (0,0,0))
+            else:
+                img_white_warning_surf = self.font.render("White is in check-mate!", True, (255,0,0))
+            img_white_warning_rect = img_white_warning_surf.get_rect()
+            img_white_warning_rect[0] = self.off_x+self.tile_size*9
+            img_white_warning_rect[1] = self.off_y+self.tile_size*3
+
+        img_black_warning_surf = 0
+        if self.black_warning:
+            if self.black_warning == 1:
+                img_black_warning_surf = self.font.render("Black is in check!", True, (0,0,0))
+            else:
+                img_black_warning_surf = self.font.render("Black is in check-mate!", True, (255,0,0))
+            img_black_warning_rect = img_black_warning_surf.get_rect()
+            img_black_warning_rect[0] = self.off_x+self.tile_size*9
+            img_black_warning_rect[1] = self.off_y+self.tile_size*3.5
+
         self.game_screen.blit(img_player_surf, img_player_rect)
         self.game_screen.blit(img_selected_piece_surf, img_selected_piece_rect)
         if img_selected_piece_icon_surf:
@@ -159,6 +181,10 @@ class Board:
             self.game_screen.blit(img_vertical_coords_surf[i], img_vertical_coords_rect[i])
         for i in range(0, 8):
             self.game_screen.blit(img_horizontal_coords_surf[i], img_horizontal_coords_rect[i])
+        if img_white_warning_surf:
+            self.game_screen.blit(img_white_warning_surf, img_white_warning_rect)
+        if img_black_warning_surf:
+            self.game_screen.blit(img_black_warning_surf, img_black_warning_rect)
 
     def blit_board(self):
         self.blit_tiles()
@@ -193,7 +219,14 @@ class Board:
                             aux_board = Board(self.off_y, self.off_x, self.tile_size, self.game_screen)
                             for i in range(1, 9):
                                 for j in range(1, 9):
-                                    aux_board.pieces[i][j] = self.pieces[i][j]
+                                    if self.pieces[i][j]:
+                                        aux_board.pieces[i][j] = Piece(i, j, 50, 50, 50, 0, "pawn")
+                                        aux_board.pieces[i][j].bw = self.pieces[i][j].bw
+                                        aux_board.pieces[i][j].name = self.pieces[i][j].name
+                                        aux_board.pieces[i][j].move = self.pieces[i][j].move
+                                        aux_board.pieces[i][j].movedtwo = self.pieces[i][j].movedtwo
+                                    else:
+                                        aux_board.pieces[i][j] = 0
                             aux_board.pieces[move[0]][move[1]] = aux_board.pieces[y][x]
                             aux_board.pieces[y][x] = 0
 
@@ -218,27 +251,40 @@ class Board:
         return False
 
     def is_mated(self, bw):
+        checked_moves = 0
+        checked_moves_in_check = 0
         for y in range(1, 9):
             for x in range(1, 9):
-                #if self.pieces[y][x]:
-                #    print(self.pieces[y][x].name)
-                if self.pieces[y][x] and self.pieces[y][x].bw == bw and self.pieces[y][x].name == "king":
-                    king_y = y
-                    king_x = x
-        print("start mate check")
-        moves_in_check = 0
-        self.generate_piece_possible_moves_without_check(king_y, king_x)
-        for king_move in self.pieces[king_y][king_x].possible_moves:
-            for y in range(1, 9):
-                for x in range(1, 9):
-                    if self.pieces[y][x] and self.pieces[y][x].bw != bw:
-                        self.generate_piece_possible_moves_without_check(y, x)
-                        for move in self.pieces[y][x].possible_moves:
-                            if king_move == move:
-                                print("bw {} in check! (from is_mated func)".format(bw))
-                                moves_in_check += 1
-        if moves_in_check == len(self.pieces[king_y][king_x].possible_moves):
-            print("bw {} in check mate with {} possile moves".format(bw, len(self.pieces[king_y][king_x].possible_moves)))
+                if self.pieces[y][x] and self.pieces[y][x].bw == bw:
+                    self.generate_piece_possible_moves_without_check(y, x)
+                    for move in self.pieces[y][x].possible_moves:
+                        checked_moves += 1
+                        is_check = 0
+
+                        aux_board = Board(self.off_y, self.off_x, self.tile_size, self.game_screen)
+                        for i in range(1, 9):
+                            for j in range(1, 9):
+                                if self.pieces[i][j]:
+                                    aux_board.pieces[i][j] = Piece(i, j, 50, 50, 50, 0, "pawn")
+                                    aux_board.pieces[i][j].bw = self.pieces[i][j].bw
+                                    aux_board.pieces[i][j].name = self.pieces[i][j].name
+                                    aux_board.pieces[i][j].move = self.pieces[i][j].move
+                                    aux_board.pieces[i][j].movedtwo = self.pieces[i][j].movedtwo
+                                else:
+                                    aux_board.pieces[i][j] = 0
+                        aux_board.pieces[move[0]][move[1]] = aux_board.pieces[y][x]
+                        aux_board.pieces[y][x] = 0
+                        for aux_y in range(1, 9):
+                            for aux_x in range(1, 9):
+                                if aux_board.pieces[aux_y][aux_x] and aux_board.pieces[aux_y][aux_x].bw != bw:
+                                    aux_board.generate_piece_possible_moves_without_check(aux_y, aux_x)
+                                    for aux_move in self.pieces[aux_y][aux_x].possible_moves:
+                                        if aux_board.pieces[aux_move[0]][aux_move[1]] and aux_board.pieces[aux_move[0]][aux_move[1]].name == "king" and aux_board.pieces[aux_move[0]][aux_move[1]].bw == bw:
+                                            print("bw {} in check! (from is_mated func)".format(bw))
+                                            is_check = 1
+                        checked_moves_in_check += is_check
+        if checked_moves == checked_moves_in_check:
+            print("bw {} in check mate with {} possile moves".format(bw, checked_moves))
             return True
         else:
             return False
@@ -446,14 +492,29 @@ class Board:
 
     def generate_piece_possible_moves_with_check(self, y, x):
         self.generate_piece_possible_moves_without_check(y, x)
-        for move in self.pieces[y][x].possible_moves:
-            aux_board = Board(self.off_y, self.off_x, self.tile_size, self.game_screen)
-            for i in range(1, 9):
-                for j in range(1, 9):
-                    aux_board.pieces[i][j] = self.pieces[i][j]
-            aux_board.pieces[move[0]][move[1]] = aux_board.pieces[y][x]
-            aux_board.pieces[y][x] = 0
-            if aux_board.is_checked(self.pieces[y][x].bw):
+        moves_to_remove = list()
+        print("moves before check: {}".format(self.pieces[y][x].possible_moves))
+        if self.pieces[y][x].possible_moves:
+            for move in self.pieces[y][x].possible_moves:
+                aux_board = Board(self.off_y, self.off_x, self.tile_size, self.game_screen)
+                for i in range(1, 9):
+                    for j in range(1, 9):
+                        if self.pieces[i][j]:
+                            aux_board.pieces[i][j] = Piece(i, j, 50, 50, 50, 0, "pawn")
+                            aux_board.pieces[i][j].bw = self.pieces[i][j].bw
+                            aux_board.pieces[i][j].name = self.pieces[i][j].name
+                            aux_board.pieces[i][j].move = self.pieces[i][j].move
+                            aux_board.pieces[i][j].movedtwo = self.pieces[i][j].movedtwo
+                        else:
+                            aux_board.pieces[i][j] = 0
+                aux_board.pieces[move[0]][move[1]] = aux_board.pieces[y][x]
+                aux_board.pieces[y][x] = 0
+                if aux_board.is_checked(self.pieces[y][x].bw):
+                    moves_to_remove.append(move)
+            print("moves in list after check: {}".format(self.pieces[y][x].possible_moves))
+            print("moves to remove after check: {}".format(moves_to_remove))
+            print("bad copy {}".format(self.pieces == aux_board.pieces))
+            for move in moves_to_remove:
                 self.pieces[y][x].possible_moves.remove(move)
 
     def attempt_move(self, y, x):
@@ -483,9 +544,18 @@ class Board:
             self.selected_piece = "none"
 
             if self.is_checked(0):
-                self.is_mated(0)
+                self.white_warning = 1
+                if self.is_mated(0):
+                    self.white_warning = 2
+            else:
+                self.white_warning = 0
+
             if self.is_checked(1):
-                self.is_mated(1)
+                self.black_warning = 1
+                if self.is_mated(1):
+                    self.black_warning = 2
+            else:
+                self.black_warning = 0
         else:
             print("bad move!")
 
