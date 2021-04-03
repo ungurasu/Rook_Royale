@@ -218,75 +218,20 @@ class Board:
                     self.generate_piece_possible_moves_without_check(y, x)
                     for move in self.pieces[y][x].possible_moves:
                         if (king_y, king_x) == move:
-                            aux_board = Board(self.off_y, self.off_x, self.tile_size, self.game_screen)
-                            for i in range(1, 9):
-                                for j in range(1, 9):
-                                    if self.pieces[i][j]:
-                                        aux_board.pieces[i][j] = Piece(i, j, 50, 50, 50, 0, "pawn")
-                                        aux_board.pieces[i][j].bw = self.pieces[i][j].bw
-                                        aux_board.pieces[i][j].name = self.pieces[i][j].name
-                                        aux_board.pieces[i][j].move = self.pieces[i][j].move
-                                        aux_board.pieces[i][j].movedtwo = self.pieces[i][j].movedtwo
-                                    else:
-                                        aux_board.pieces[i][j] = 0
-                            aux_board.pieces[move[0]][move[1]] = aux_board.pieces[y][x]
-                            aux_board.pieces[y][x] = 0
-
-                            valid = True
-                            for aux_y in range(1, 9):
-                                for aux_x in range(1, 9):
-                                    if aux_board.pieces[aux_y][aux_x] and aux_board.pieces[aux_y][aux_x].bw == self.pieces[y][x].bw and aux_board.pieces[aux_y][aux_x].name == "king":
-                                        aux_king_y = aux_y
-                                        aux_king_x = aux_x
-                            for aux_y in range(1, 9):
-                                for aux_x in range(1, 9):
-                                    if aux_board.pieces[aux_y][aux_x] and aux_board.pieces[aux_y][aux_x].bw != self.pieces[y][x].bw:
-                                        aux_board.generate_piece_possible_moves_without_check(aux_y, aux_x)
-                                        for aux_move in aux_board.pieces[aux_y][aux_x].possible_moves:
-                                            if (aux_king_y, aux_king_x) == aux_move:
-                                                valid = False
-
-                            #print(aux_board.pieces[move[0]][move[1]].name)
-                            if valid:
-                                print("bw {} in check!".format(bw))
-                                return True
+                            return True
         return False
 
     def is_mated(self, bw):
-        checked_moves = 0
-        checked_moves_in_check = 0
+        is_in_mate = 1
         for y in range(1, 9):
             for x in range(1, 9):
                 if self.pieces[y][x] and self.pieces[y][x].bw == bw:
-                    self.generate_piece_possible_moves_without_check(y, x)
-                    for move in self.pieces[y][x].possible_moves:
-                        checked_moves += 1
-                        is_check = 0
+                    self.generate_piece_possible_moves_with_check(y, x)
+                    if self.pieces[y][x].possible_moves:
+                        is_in_mate = 0
 
-                        aux_board = Board(self.off_y, self.off_x, self.tile_size, self.game_screen)
-                        for i in range(1, 9):
-                            for j in range(1, 9):
-                                if self.pieces[i][j]:
-                                    aux_board.pieces[i][j] = Piece(i, j, 50, 50, 50, 0, "pawn")
-                                    aux_board.pieces[i][j].bw = self.pieces[i][j].bw
-                                    aux_board.pieces[i][j].name = self.pieces[i][j].name
-                                    aux_board.pieces[i][j].move = self.pieces[i][j].move
-                                    aux_board.pieces[i][j].movedtwo = self.pieces[i][j].movedtwo
-                                else:
-                                    aux_board.pieces[i][j] = 0
-                        aux_board.pieces[move[0]][move[1]] = aux_board.pieces[y][x]
-                        aux_board.pieces[y][x] = 0
-                        for aux_y in range(1, 9):
-                            for aux_x in range(1, 9):
-                                if aux_board.pieces[aux_y][aux_x] and aux_board.pieces[aux_y][aux_x].bw != bw:
-                                    aux_board.generate_piece_possible_moves_without_check(aux_y, aux_x)
-                                    for aux_move in self.pieces[aux_y][aux_x].possible_moves:
-                                        if aux_board.pieces[aux_move[0]][aux_move[1]] and aux_board.pieces[aux_move[0]][aux_move[1]].name == "king" and aux_board.pieces[aux_move[0]][aux_move[1]].bw == bw:
-                                            print("bw {} in check! (from is_mated func)".format(bw))
-                                            is_check = 1
-                        checked_moves_in_check += is_check
-        if checked_moves == checked_moves_in_check:
-            print("bw {} in check mate with {} possile moves".format(bw, checked_moves))
+        if is_in_mate:
+            print("bw {} in check mate with {} possile moves".format(bw, 0))
             return True
         else:
             return False
@@ -660,6 +605,7 @@ class Board:
                     file.write("{}\n".format(self.pieces[y][x].movedtwo))
 
         file.close()
+        print("Exported board to file in saves folder.")
 
 
 class Player(pygame.sprite.Sprite):
