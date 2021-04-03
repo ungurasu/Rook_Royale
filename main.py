@@ -522,7 +522,7 @@ class Board:
         if self.pieces[self.selected_y][self.selected_x].possible_moves.count((y, x)):
             self.pieces[self.selected_y][self.selected_x].move += 1
             if self.pieces[self.selected_y][self.selected_x].name == "pawn":
-                if y == self.selected_y + 2:
+                if y == self.selected_y+2 or y == self.selected_y-2:
                     self.pieces[self.selected_y][self.selected_x].movedtwo = 1
                 if x == self.selected_x+1 and self.pieces[self.selected_y][self.selected_x+1] and self.pieces[self.selected_y][self.selected_x+1].name == "pawn" and self.pieces[self.selected_y][self.selected_x+1].bw != self.pieces[self.selected_y][self.selected_x].bw and self.pieces[self.selected_y][self.selected_x+1].move == 1 and self.pieces[self.selected_y][self.selected_x+1].movedtwo:
                     self.eat_piece(self.selected_y, self.selected_x+1)

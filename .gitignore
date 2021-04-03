@@ -3,3 +3,7 @@ black_palette.aseprite
 white_palette.aseprite
 white_template.png
 .idea
+build
+dist
+main.spec
+setup maker
