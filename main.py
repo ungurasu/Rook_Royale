@@ -1,3 +1,5 @@
+import time
+import os
 import pygame
 from pygame.locals import *
 
@@ -588,6 +590,77 @@ class Board:
     def unclick_event(self):
         self.selected_piece = "none"
 
+    def load_board_from_file(self, filename):
+        try:
+            file = open(filename, "r")
+        except:
+            print("Failed to open file!")
+        else:
+            for y in range(1,9):
+                for x in range(1,9):
+                    self.pieces[y][x] = 0
+
+            no_pieces = int(file.readline())
+            no_read_pieces = 1
+            while no_read_pieces <= no_pieces:
+                piece_name = file.readline()
+                piece_name = piece_name.replace('\n', '')
+                piece_bw = int(file.readline())
+                piece_y = int(file.readline())
+                piece_x = int(file.readline())
+                piece_move = int(file.readline())
+                piece_movedtwo = int(file.readline())
+                print("read bw {} name {} y {} x {} move {} enpassantable {}".format(piece_bw, piece_name, piece_y, piece_x, piece_move, piece_movedtwo))
+                self.pieces[piece_y][piece_x] = Piece(piece_y, piece_x, self.off_y, self.off_x, self.tile_size, piece_bw, piece_name)
+                self.pieces[piece_y][piece_x].move = piece_move
+                self.pieces[piece_y][piece_x].movedtwo = piece_movedtwo
+
+                no_read_pieces += 1
+
+            if self.is_checked(0):
+                self.white_warning = 1
+                if self.is_mated(0):
+                    self.white_warning = 2
+            else:
+                self.white_warning = 0
+
+            if self.is_checked(1):
+                self.black_warning = 1
+                if self.is_mated(1):
+                    self.black_warning = 2
+            else:
+                self.black_warning = 0
+
+            file.close()
+
+    def save_board_to_file(self):
+        try:
+            os.mkdir("saves")
+        except FileExistsError:
+            print("Directory saves already exists!")
+        except:
+            print("Some error making save files folder!")
+
+        file = open("saves/save{}.txt".format(int(time.time())), "w")
+        no_pieces = 0
+        for y in range(1, 9):
+            for x in range(1, 9):
+                if self.pieces[y][x]:
+                    no_pieces += 1
+
+        file.write("{}\n".format(no_pieces))
+        for y in range(1, 9):
+            for x in range(1, 9):
+                if self.pieces[y][x]:
+                    file.write("{}\n".format(self.pieces[y][x].name))
+                    file.write("{}\n".format(self.pieces[y][x].bw))
+                    file.write("{}\n".format(self.pieces[y][x].y))
+                    file.write("{}\n".format(self.pieces[y][x].x))
+                    file.write("{}\n".format(self.pieces[y][x].move))
+                    file.write("{}\n".format(self.pieces[y][x].movedtwo))
+
+        file.close()
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -627,6 +700,7 @@ running = True
 board = Board(50, 50, 50, screen)
 clicked = 0
 unclicked = 0
+lastkey = 0
 
 while running:
     for event in pygame.event.get():
@@ -635,6 +709,17 @@ while running:
         elif event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 running = False
+            if event.key == K_l and lastkey != 'l':
+                lastkey = 'l'
+                board.load_board_from_file("in_board.txt")
+            elif event.key == K_s and lastkey != 's':
+                lastkey = 's'
+                board.save_board_to_file()
+            elif event.key == K_t and lastkey != 't':
+                lastkey = 't'
+                board.player = not board.player
+        else:
+            lastkey = 0
 
     screen.fill((255, 255, 255))
 
